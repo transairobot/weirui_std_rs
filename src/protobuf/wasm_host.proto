@@ -1,0 +1,99 @@
+syntax = "proto2";
+
+// Unified result wrapper for all host function responses
+message HostResult {
+    optional int32 error_code = 1;      // 0 = success, non-zero = error
+    optional string error_message = 2;  // Human-readable error description
+    optional bytes data = 3;            // Serialized response data (specific message type)
+}
+
+message TargetRadianAction {
+    repeated uint32 servo_id_vec = 1;
+    repeated float target_rad_vec = 2;
+}
+
+message DeltaRadianAction {
+    repeated uint32 servo_id_vec = 1;
+    repeated float delta_rad_vec = 2;
+}
+
+message EndEffectorAction {
+    optional float delta_x = 1;
+    optional float delta_y = 2;
+    optional float delta_z = 3;
+    optional string urdf_file_path = 4;  // Path to URDF file, defaults to "./SO101/so101_new_calib.urdf"
+    optional string target_link_name = 5;  // Target link name, defaults to "gripper"
+}
+
+message ActionResult {
+    repeated bool finish_vec = 1;
+    repeated float current_radian_vec = 2;
+}
+
+message Pair {
+    optional string key = 1;
+    optional string value = 2;
+}
+
+message HttpRequest {
+    optional string url = 1;
+    optional string method = 2;
+    repeated Pair headers = 3;
+    optional string body = 4;
+}
+
+message HttpResponse {
+    optional int32 status_code = 1;
+    repeated Pair headers = 2;
+    optional string body = 3;
+}
+
+message ServoInfo {
+    optional uint32 servo_id = 1;
+    optional string name = 3;
+    optional float min_rad = 4;
+    optional float max_rad = 5;
+    optional uint32 resolution = 6;
+}
+
+message ServoInfoList {
+    repeated ServoInfo infos = 1;
+}
+
+message ServoRawParam {
+    optional uint32 servo_id = 1;
+    repeated ParamEntry params = 2;
+}
+
+message ParamEntry {
+    optional string key = 1;
+    optional int32 value = 2;
+}
+
+message ServoRawParamList {
+    repeated ServoRawParam params = 1;
+}
+
+message McpTool {
+    optional string name = 1;
+    optional string description = 2;
+    optional string input_schema = 3;  // JSON schema as string
+}
+
+message McpToolList {
+    repeated McpTool tools = 1;
+}
+
+message McpCallToolRequest {
+    optional string tool_name = 1;
+    optional string arguments = 2;  // JSON string
+}
+
+message McpCallToolResponse {
+    optional string content = 1;  // JSON string of the result
+    optional bool is_error = 2;
+}
+
+message StringResponse {
+    optional string value = 1;  // String value
+}
