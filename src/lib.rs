@@ -62,3 +62,6 @@ pub extern "C" fn wasm_new_bytes(len: u32) -> i32 {
     // Return the pointer as an i32
     ptr as i32
 }
+
+#[no_mangle]
+pub static WEIRUI_CLIENT_LANGUAGE: i32 = 1;
