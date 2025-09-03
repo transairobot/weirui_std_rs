@@ -1,0 +1,77 @@
+syntax = "proto2";
+
+// Unified result wrapper for all host function responses
+message HostResult {
+    optional int32 error_code = 1;      // 0 = success, non-zero = error
+    optional string error_message = 2;  // Human-readable error description
+    optional bytes data = 3;            // Serialized response data (specific message type)
+}
+
+message RunTargetActionReq {
+    repeated uint32 servo_id_vec = 1;
+    repeated float target_rad_vec = 2;
+}
+
+message RunTargetActionResp {
+    repeated uint32 servo_id_vec = 1;
+    repeated float target_rad_vec = 2;
+}
+
+enum ActuatorType {
+    DUMMY = 0;
+    MOTOR = 1;
+    POSITION = 2;
+}
+
+message ActuatorInfo {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional ActuatorType type = 3;
+    optional string vendor = 4;
+    optional string model = 5;
+    optional float ctrl = 6;
+    optional float ctrl_min = 7;
+    optional float ctrl_max = 8;
+    optional float force_min = 9;
+    optional float force_max = 10;
+    optional int32 joint_id = 11;
+}
+
+message GetActuatorInfoReq {
+    // This request is empty
+}
+
+message GetActuatorInfoResp {
+    repeated ActuatorInfo actuators = 1;
+}
+
+enum JointType {
+    HINGE = 0;
+    SLIDE = 1;
+    BALL = 2;
+    FREE = 3;
+}
+
+message JointInfo {
+    optional string name = 1;
+    optional int32 id = 2;
+    optional JointType type = 3;
+    optional int32 dof_dim = 4;
+    repeated float joint_pos = 5;
+}
+
+message GetJointInfoReq {
+    // This request is empty
+}
+
+message GetJointInfoResp {
+    repeated JointInfo joints = 1;
+}
+
+message ConsoleWriteReq {
+    optional string message = 1;
+}
+
+message EmptyDummy {
+    
+}
