@@ -24,6 +24,7 @@ The library implements a unified result system and uses a radian-based coordinat
 Add this to your `Cargo.toml`:
 
 ```toml
+# cargo add --git https://github.com/transairobot/weirui_std_rs.git 
 [dependencies]
 weirui_std_rs = { git = "https://github.com/transairobot/weirui_std_rs.git" }
 ```
