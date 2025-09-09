@@ -8,10 +8,10 @@ repository = "https://github.com/your-org/weirui_std_rs"
 keywords = ["robotics", "webassembly", "servo", "control", "mcp"]
 categories = ["robotics", "wasm", "api-bindings"]
 
-# [lib]
-# name = "weirui_std_rs"
-# path = "src/lib.rs"
-# crate-type = ["cdylib", "rlib"]
+[lib]
+name = "weirui_std_rs"
+path = "src/lib.rs"
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 anyhow = { version = "1.0.99"}

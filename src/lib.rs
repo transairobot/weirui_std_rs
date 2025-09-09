@@ -1,6 +1,8 @@
 pub mod host;
 pub mod utils;
 
+use host::host_func::*;
+
 #[macro_export]
 macro_rules! println {
     () => {
@@ -10,9 +12,4 @@ macro_rules! println {
         let x = core::format_args!($($arg)*);
         host::host_func::write_console(&format!("{}\n", x)).unwrap();
     }};
-}
-
-
-pub fn main() {
-    println!("Hello, weirui_std_rs!");
 }
