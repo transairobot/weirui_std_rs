@@ -1,191 +1,94 @@
-# Weirui Std RS
+# weirui_std_rs
 
-A Rust standard library for robot control using WebAssembly host functions. This library provides a unified interface for controlling servo motors, performing network requests, and interacting with Model Context Protocol (MCP) services.
+A Rust standard library for robot control using WebAssembly host functions in the Weirui robot operating system.
+
+## Overview
+
+`weirui_std_rs` is a Rust library that provides a high-level interface for controlling robots in the Weirui operating system. It allows WebAssembly modules to communicate with the host environment to perform operations such as servo control, network requests, and I/O operations.
+
+The library implements a unified result system and uses a radian-based coordinate system as specified in the Weirui documentation.
 
 ## Features
 
-- **Servo Control**: Control servo motors with radian-based positioning
-- **Action System**: Execute coordinated movements across multiple servos
-- **End Effector Control**: Move robot end effector using inverse kinematics
-- **Network Functions**: Perform HTTP requests
-- **MCP Integration**: Connect to and interact with MCP services
-- **I/O Functions**: Read user input with prompts
-- **Unified Error Handling**: Consistent error reporting across all functions
-- **Angle Utilities**: Convert between degrees and radians with normalization
+- **Servo Control**: High-level functions for controlling robot actuators
+- **Network Operations**: Make HTTP requests from WebAssembly modules
+- **I/O Operations**: Read input from the console
+- **MCP Integration**: Connect and interact with MCP services
+- **Error Handling**: Unified error system with proper error propagation
+- **Angle Utilities**: Conversion between degrees and radians with normalization
+- **Memory Safety**: Safe FFI with proper lifetime management
 
-## Quick Start
+## Installation
 
 Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-weirui_std_rs = "0.1.0"
+weirui_std_rs = { git = "https://github.com/transairobot/weirui_std_rs.git" }
 ```
 
-## Basic Usage
+## Usage
 
-### Servo Control
+Here's a simple example of how to use the library:
 
 ```rust
 use weirui_std_rs::*;
 
-// Get servo information
-let servo_ids = [1u8, 2u8, 3u8];
-let info_list = servo_info(&servo_ids)?;
-
-// Move servo to 90 degrees
-let angle_radians = degrees_to_radians(90.0);
-let result = move_servo_to_angle(1, angle_radians, 100, 50)?;
-
-// Move multiple servos
-let servo_ids = [1u8, 2u8];
-let angles = [degrees_to_radians(45.0), degrees_to_radians(-30.0)];
-let result = move_servos_to_angles(&servo_ids, &angles)?;
-```
-
-### End Effector Control
-
-```rust
-use std::borrow::Cow;
-
-// Move end effector by delta amounts
-let action = EndEffectorAction {
-    delta_x: Some(0.05),  // 5cm in X
-    delta_y: Some(0.0),   // No Y movement
-    delta_z: Some(0.02),  // 2cm up in Z
-    urdf_file_path: None, // Use default URDF
-    target_link_name: None, // Use default target link
-};
-
-let result = run_end_effector_action(&action)?;
-```
-
-### Network Requests
-
-```rust
-use std::borrow::Cow;
-
-let request = HttpRequest {
-    url: Some(Cow::Borrowed("https://api.example.com/data")),
-    method: Some(Cow::Borrowed("GET")),
-    headers: vec![
-        Pair {
-            key: Some(Cow::Borrowed("Authorization")),
-            value: Some(Cow::Borrowed("Bearer token123")),
-        }
-    ],
-    body: None,
-};
-
-let response = fetch("https://api.example.com/data", &request)?;
-```
-
-### Interactive Input
-
-```rust
-let user_input = readline("Enter command: ")?;
-println!("You entered: {}", user_input);
-```
-
-## Coordinate System
-
-All servo positions use **radian-based coordinates** in the range **-π to π**:
-
-- **0 radians**: Center position
-- **π/2 radians**: 90 degrees clockwise
-- **-π/2 radians**: 90 degrees counter-clockwise
-- **π radians**: 180 degrees
-
-### Angle Conversion Utilities
-
-```rust
-// Convert degrees to radians
-let radians = degrees_to_radians(90.0); // π/2
-
-// Convert radians to degrees  
-let degrees = radians_to_degrees(std::f32::consts::PI); // 180.0
-
-// Normalize angle to [-π, π] range
-let normalized = normalize_radians(3.0 * std::f32::consts::PI); // π
-```
-
-## Error Handling
-
-All functions use the unified `HostResult` system with these error codes:
-
-- `0` - Success
-- `1` - Invalid Parameter
-- `2` - Memory Error
-- `3` - Servo Error
-- `4` - Network Error
-- `5` - MCP Error
-- `6` - Serialization Error
-- `7` - Internal Error
-
-```rust
-match servo_info(&[1u8]) {
-    Ok(info_list) => {
-        // Handle successful result
-        println!("Got servo info: {:?}", info_list);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Write to console
+    println!("Hello, Weirui robot!");
+    
+    // Get information about all actuators
+    let actuators = get_actuators()?;
+    for actuator in actuators {
+        println!("Actuator: {} (ID: {})", actuator.name, actuator.id);
     }
-    Err(e) => {
-        // Handle error with descriptive message
-        eprintln!("Servo error: {}", e);
-    }
+    
+    // Control robot actuators
+    let servo_ids = &[1, 2, 3];
+    let target_positions = &[1.57, 0.0, -1.57]; // 90°, 0°, -90° in radians
+    run_actuator_targets(servo_ids, target_positions)?;
+    
+    Ok(())
 }
 ```
 
-## MCP Integration
+## API Documentation
 
-Connect to Model Context Protocol services:
+### Host Functions
 
-```rust
-// Connect to MCP service
-let handle = connect_mcp_service("http://localhost:3001/sse");
+The library provides wrappers for these low-level host functions:
 
-// List available tools
-let tools = list_all_tools(handle)?;
+1. **Console I/O**
+   - `write_console(message: &str)` - Write a message to the console
 
-// Call a tool
-let request = McpCallToolRequest {
-    tool_name: Some(Cow::Borrowed("get_weather")),
-    arguments: Some(Cow::Borrowed(r#"{"location": "New York"}"#)),
-};
-let response = call_tool(handle, &request)?;
-```
+2. **Actuator Control**
+   - `run_actuator_targets(servo_ids: &[u32], target_radians: &[f32])` - Set target positions for actuators
+   - `get_actuators()` - Get information about all actuators
 
-## Examples
+3. **Joint Information**
+   - `get_joints()` - Get information about robot joints
 
-Run the example to see the library in action:
+### Utility Functions
 
-```bash
-cargo run --example robot_control
-```
+- `degrees_to_radians(degrees: f32) -> f32` - Convert degrees to radians
+- `radians_to_degrees(radians: f32) -> f32` - Convert radians to degrees
+- `normalize_radians(radians: f32) -> f32` - Normalize angles to [-π, π] range
 
 ## Architecture
 
-This library acts as a bridge between Rust WebAssembly modules and host environment functions. It provides:
+The library acts as a bridge between Rust WebAssembly modules and host environment functions:
 
-1. **Type-safe protobuf message handling** using `quick-protobuf`
-2. **Memory-safe FFI** with proper error handling
-3. **Consistent API** across all robot control functions
-4. **Lifetime management** for borrowed data from host functions
-
-## Host Function Requirements
-
-The library expects the host environment to provide these external functions:
-
-- `host_servo_info` - Get servo information
-- `host_run_target_action` - Execute target position actions
-- `host_run_delta_action` - Execute delta movement actions
-- `host_run_end_effector_action` - Execute end effector movements
-- `host_fetch` - Perform HTTP requests
-- `host_readline` - Read user input
-- `host_connect_mcp_service` - Connect to MCP services
-- And more...
-
-See the [Host Functions Documentation](docs/host_func.md) for complete details.
+1. **Host Functions** - External C functions provided by the host
+2. **Protobuf Messages** - Type-safe message serialization
+3. **Error Handling** - Unified error system with proper propagation
+4. **Utility Functions** - High-level convenience functions
+5. **Angle Conversion** - Mathematical utilities for coordinate systems
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
