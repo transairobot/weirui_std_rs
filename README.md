@@ -1,6 +1,7 @@
 # weirui_std_rs
 
 A Rust standard library for robot control using WebAssembly host functions in the Weirui robot operating system.
+Robot applications written with this library can run anywhere the Weirui Robot Operating System is supported(e.g. browsers,ubuntu, macOS, Orange Pi, and Raspberry Pi.)
 
 ## Overview
 
